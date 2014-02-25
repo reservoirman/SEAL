@@ -11,6 +11,7 @@
 	| head::second::tail -> if (head = second) then uniq (second::tail) else head::(uniq (second::tail)) ;;
 
 It produces the following output:
+
 	# uniq [1;2;3];;
 	- : int list = [1; 2; 3]
 	# uniq [1;1;1;3;4;1;1];;
@@ -147,6 +148,7 @@ It produces the following output:
 
 ###3. Extended "Calculator"
 scanner.mll:
+
 	{ open Parser }
 
 	let digit = ['0'-'9']+
@@ -169,6 +171,7 @@ scanner.mll:
 
 
 ast.mli:
+
 	type operator = Add | Sub | Mul | Div
 
 	type expr =
@@ -182,6 +185,7 @@ ast.mli:
 
 
 parser.mly:
+
 	%{ open Ast %}
 
 	/* declarations */
@@ -215,6 +219,7 @@ parser.mly:
 
 
 calc.ml:
+
 	open Ast
 
 	let var_array = Array.make 10 0;;
@@ -239,6 +244,7 @@ calc.ml:
 	  print_endline (string_of_int result)
 
 It produces the following output:
+
 	w4118@ubuntu:~/Documents/Columbia/CS 4115/calculator$ ./calc 
 	$1 = 1, $2 = 2, $3 = 3, $1 + $2 + $3
 	6
