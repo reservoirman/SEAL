@@ -257,4 +257,8 @@ It produces the following output:
 	w4118@ubuntu:~/Documents/Columbia/CS 4115/calculator$ ./calc 
 	1 + 2 + 3 + 4
 	10
+	w4118@ubuntu:~/Documents/Columbia/CS 4115/calculator$ ./calc
+	$1 = 10, $1 + $5 - 5 + 3
+	8
+
 
