@@ -7,4 +7,4 @@ Simple Embedded Avionics Language (SEAL) is a programming language that simplifi
 
 SEAL is strongly and statically typed, case-sensitive, procedural, and can be object oriented.
 
-SEAL also supports various avionics communications protocols, such as the various ARINC protocols.
+SEAL also supports various avionics communications protocols, such as the ARINC protocols.
