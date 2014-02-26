@@ -165,7 +165,7 @@ scanner.mll:
 	| '=' { ASSIGN }
 	| ',' { SEQUENCE }
 	| eof { EOF }
-	| '\n' {EOF}	(*moved new line here so that expressions can be evalauted at the terminal by pressing "Enter" *)
+	| '\n' {EOF}	(*moved new line here so that expressions can be evalauted at the terminal *)
 ```
 
 
@@ -187,7 +187,7 @@ parser.mly:
 	%{ open Ast %}
 
 	/* declarations */
-	%token PLUS MINUS TIMES DIVIDE EOF SEQUENCE ASSIGN /*added new token SEQUENCE (comma) and ASSIGN (=) */
+	%token PLUS MINUS TIMES DIVIDE EOF SEQUENCE ASSIGN /*added new tokens SEQUENCE (,) and ASSIGN (=)*/
 	%token <int> LITERAL
 	%token <int> VARIABLE
 
