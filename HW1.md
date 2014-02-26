@@ -4,27 +4,27 @@
 ##HW1
 
 ###1. "Uniq" function
-
-	let rec uniq = function 
-	 [] -> []
-	| [a] -> [a]
-	| head::second::tail -> if (head = second) then uniq (second::tail) else head::(uniq (second::tail)) ;;
-
+```ocaml
+let rec uniq = function 
+ [] -> []
+| [a] -> [a]
+| head::second::tail -> if (head = second) then uniq (second::tail) else head::(uniq (second::tail)) ;;
+```
 It produces the following output:
-
-	# uniq [1;2;3];;
-	- : int list = [1; 2; 3]
-	# uniq [1;1;1;3;4;1;1];;
-	- : int list = [1; 3; 4; 1]
-	# uniq [1;1;1;1;2;2;2;2;3;3;3;3;4;4;4;4;1;1;1;1];;
-	- : int list = [1; 2; 3; 4; 1]
-	# uniq [1;1];;
-	- : int list = [1]
-
+```ocaml
+# uniq [1;2;3];;
+- : int list = [1; 2; 3]
+# uniq [1;1;1;3;4;1;1];;
+- : int list = [1; 3; 4; 1]
+# uniq [1;1;1;1;2;2;2;2;3;3;3;3;4;4;4;4;1;1;1;1];;
+- : int list = [1; 2; 3; 4; 1]
+# uniq [1;1];;
+- : int list = [1]
+```
 ###2. Word frequency counter
 
 wordcount.mll:
-
+```ocaml
 	{ type token = EOF | Word of string 
 	  module StringMap = Map.Make(String)
 	;;}
@@ -65,7 +65,7 @@ wordcount.mll:
 	(* outputting each count, word tuple via the C printf function *)
 	List.iter (fun (count, word)-> Printf.printf "%d %s\n" count word) wordtuplelist;;
 	}
-
+```
 It produces the following output:
 
 	w4118@ubuntu:~/Documents/Columbia/CS 4115/HW1$ ocaml wordcount.ml < wordcount.mll
@@ -148,7 +148,7 @@ It produces the following output:
 
 ###3. Extended "Calculator"
 scanner.mll:
-
+```ocaml
 	{ open Parser }
 
 	let digit = ['0'-'9']+
@@ -165,13 +165,12 @@ scanner.mll:
 	| '=' { ASSIGN }
 	| ',' { SEQUENCE }
 	| eof { EOF }
-	| '\n' {EOF}	(*moved the new line here so that expressions can be evalauted at the terminal by pressing "Enter" *)
-
-
+	| '\n' {EOF}	(*moved new line here so that expressions can be evalauted at the terminal by pressing "Enter" *)
+```
 
 
 ast.mli:
-
+```ocaml
 	type operator = Add | Sub | Mul | Div
 
 	type expr =
@@ -180,12 +179,11 @@ ast.mli:
 	  | Seq of expr * expr
 	  | Asn of int * expr
 	  | Var of int
-
-
+```
 
 
 parser.mly:
-
+```ocaml
 	%{ open Ast %}
 
 	/* declarations */
@@ -214,12 +212,11 @@ parser.mly:
 	| VARIABLE 				{ Var($1) }
 	| VARIABLE ASSIGN expr 	{ Asn($1, $3) }
 	| expr SEQUENCE	expr	{ Seq($1, $3)}
-
-
+```
 
 
 calc.ml:
-
+```ocaml
 	open Ast
 
 	let var_array = Array.make 10 0;;
@@ -242,7 +239,7 @@ calc.ml:
 	  let expr = Parser.expr Scanner.token lexbuf in
 	  let result = eval expr in
 	  print_endline (string_of_int result)
-
+```
 It produces the following output:
 
 	w4118@ubuntu:~/Documents/Columbia/CS 4115/calculator$ ./calc 
