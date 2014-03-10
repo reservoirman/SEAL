@@ -1,0 +1,130 @@
+Include "SerialPort.ss"
+
+Lock lock;
+SerialPort sp;
+sp.Lock = lock;	//this serial port shall be shared between two threads, so lock it
+sp.Configure("COM1", 115200, 1, 0, 0);
+
+
+Float vm1, vm2, vtl1, vtl2;	//voltage of motor 1, motor 2, throttle lever 1, throttle lever 2
+Int cm1, cm2, ctl1, ctl2;	//current of motor 1, motor 2, throttle lever 1, throttle lever 2
+
+Float tr1, tr2;				//throttle rate of lever 1, lever 2
+Int sk;						//current airspeed in knots
+Float sm;					//current airspeed in Mach
+
+vm1.Address = 0x400;
+vm2.Address = 0x410;
+vtl1.Address = 0x420;
+vtl2.Address = 0x430;
+cm1.Address = 0x404;
+cm2.Address = 0x414;
+ctl1.Address = 0x424;
+ctl2.Address = 0x434;
+
+tr1.Address = 0x800;
+tr2.Address = 0x810;
+sk.Address = 0x1100;
+sm.Address = 0x1104;
+
+Get_Voltages_And_Currents
+{
+	String voltages, currents, totalOutput;
+
+
+	voltages = "Voltages: \nMotor 1 = " + vm1 + "\n Motor 2 = " + vm2 + "\ Throttle Level 1 = " + vtl1 + "\ Throttle Level 2 = " + vtl2 + "\n";
+	currents = "Currents: \nMotor 1 = " + cm1 + "\n Motor 2 = " + cm2 + "\ Throttle Level 1 = " + ctl1 + "\ Throttle Level 2 = " + ctl2 + "\n";
+	totalOutput = voltages + "\n\n\n" + currents;
+	
+	return totalOutput;
+}
+
+Get_Throttle_Rate 
+{
+	String totalOutput;
+	totalOutput = "Throttle Rate 1 = " + tr1 + "\nThrottle Rate 2 = " + tr2 + "/nAirspeed (in knots) = " + sk + "/n Airspeed (in Mach) = " + sm;
+
+	return totalOutput;
+}
+
+Thread Thread1 
+{	
+	String output;
+		
+	while (TRUE)
+	{
+		Sleep(1000);
+		output = Get_Voltages_And_Currents().Swap;
+		sp.Write(output);
+	}
+}
+
+Thread Thread2
+{
+	String output;
+		
+	while (TRUE)
+	{
+		Sleep(400);
+		output = Get_Throttle_Rate().Swap;
+		sp.Write(output);
+	}	
+}
+
+Main
+{
+
+	Thread1.Priority = 1;
+	Thread1.Go();
+	Thread2.Priority = 2;
+	Thread2.Go();
+
+}
+
+Factorial(Int n)
+{
+	if (n = 1) return 1;
+	else return n * Factorial(n - 1);
+}
+
+Type Bus1Type
+{
+	Float baroAlt;
+	Float pressureAlt;
+	Int	AOA;
+	Byte goAround;
+	Byte lastFault;
+	CalculateAOA();
+	CalculateAOAError();
+	Recalibrate(Int pitch);
+}
+
+Int counter = 0;
+Bool makeSound = FALSE;
+Interrupt SoundOff
+{
+	counter++;
+	if (counter == 4000)
+	{
+		counter = 0;
+		makeSound = TRUE;
+	}
+
+}
+
+SoundOff.Address = 0x3F;	//hooking ISR to timer interrupt at 0x3F
+
+
+Int a[7] = {10, 2, 5, 3, 5, 8, 0};
+a.Apply(print);	 	//will print "10253580"
+a.Sort().Apply(print);	//will print "02355810"
+
+printWithSpace(Int n)
+{
+	print(n + “ “);
+}
+
+a.Sort().Apply(printWithSpace);	//will print "0 2 3 5 5 8 10"
+a.Search(4)	//returns -1
+a.Search(2) //returns 2
+
