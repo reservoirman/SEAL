@@ -4,7 +4,7 @@
 ##HW2
 
 
-###1. (a) Scanner for floating point numbers.
+###1. (a) Scanner for floating point numbers
 ```ocaml
 (*integer part*)
 let integer = ['0'-'9']+
