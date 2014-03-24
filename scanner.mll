@@ -9,9 +9,9 @@ rule token = parse
 | "//"		{comment2 lexbuf}
 | '('      { LPAREN }
 | ')'      { RPAREN }
-| '{'      { LBRACE }
-| '}'      { RBRACE }
-| ';'      { SEMI }
+| '{'      { LCURLY }
+| '}'      { RCURLY }
+| ';'      { SEMIC }
 | ','      { COMMA }
 | '+'      { PLUS }
 | '-'      { MINUS }
@@ -43,10 +43,13 @@ rule token = parse
 | "Thread"	{ THREAD }
 | "Interrupt" { INTERRUPT }
 | "Enum"	{ ENUM }
-| '['		{ LBRACKET }	(* *)
-| ']'		{ RBRACKET }
-| '.'		{ LABEL }
-|
+| '['		{ LBRACKET }	(* for arrays *)
+| ']'		{ RBRACKET }	
+| '.'		{ LABEL }		(* for labels *)
+| "True"	{ TRUE }
+| "False"	{ FALSE }
+| "Type"	{ TYPE }		(* for the type declaration *)
+| "Lock"	{ LOCK }		(* for the lock type *)
 | ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | eof { EOF }
