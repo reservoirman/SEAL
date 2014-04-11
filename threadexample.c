@@ -6,31 +6,53 @@
 
 typedef struct 
 {
-	int priority
-	void (*func)(int);
+	int priority;
+	void (*func)();
+
+	/* rather than doing it this way, 
+	keep the functions global and pass 
+	in the Thread struct pointer
+		void (*Go)();
+	void (*Join)();
+	void (*Pause)();
+	void (*Unpause)();
+	void (*Stop)();
+	*/
+
 } Thread;
 
-
-Interrupt ouchie;
-
-
-void ouch (int sig)
+void Go(Thread *t)
 {
-	printf("OUCH! I got signal %d\n", ouchie.Source);
-	signal(sig, SIG_DFL);
-	ouchie.Source = 0;
+
+}
+
+void Join(Thread *t)
+{
+
+}
+
+void Pause(Thread *t)
+{
+
+}
+
+void Unpause(Thread *t)
+{
+
+}
+
+void Stop(Thread *t)
+{
 
 }
 
 
+Thread thread1;
+
 
 int main()
 {
-	ouchie.func = ouch;
-	//ouchie.Address = &ouchie;
-	ouchie.Source = SIGINT;
-	signal(ouchie.Source, ouchie.func);
-	int holla = 2;
+	Stop(&thread1);
 	while (1)
 	{
 		printf("Hello World!\n");
