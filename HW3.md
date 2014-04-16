@@ -17,7 +17,7 @@ Each cell represents one byte, with the first byte starting from the upper right
 | a[1][2] | a[1][2] | a[1][2] | a[1][2]
 
 ###1. (b)
-expression for accessing a[i][j] = a + 12i + 4j
+expression for accessing a[ i ][ j ] = a + 12i + 4j
 
 ###1. (c)  
 array.c:
@@ -77,8 +77,14 @@ a:
 ```
 
 
+###2.
 
 
+if (b == 5) a = 18; break;
+else if (b == 73) a = 2; break;
+else if (b == 105) b = 7; c = 10; break;
+else if (b == 5644) c = 8; break;
+default: c = 17; break;
 
 
 
