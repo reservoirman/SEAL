@@ -78,13 +78,31 @@ a:
 
 
 ###2.
-
-
-if (b == 5) a = 18; break;
-else if (b == 73) a = 2; break;
-else if (b == 105) b = 7; c = 10; break;
-else if (b == 5644) c = 8; break;
-default: c = 17; break;
+```asm
+	cmp b, 5
+	beq L1
+	nop
+	cmp b, 73
+	beq L2
+	nop
+	cmp b, 105
+	beq L3
+	nop
+	cmp b, 5644
+	nop
+	mov 17, c
+	jmp BREAK
+L1:	mov 18, a
+	jmp BREAK
+L2:	mov 2, a
+	jmp BREAK
+L3:	mov 7, b
+	mov 10, c
+	jmp BREAK
+L4:	mov 8, c
+	jmp BREAK
+BREAK:	nop
+```
 
 
 
