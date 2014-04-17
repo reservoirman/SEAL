@@ -187,7 +187,7 @@ Memory layout for s2. Size = 12 bytes.
 
 
 ###4. (a) Applicative-order evaluation
-In this case, incw() and incx() will be evaluated before foo(), and their values (9 and 13 respectively) passed on to foo.  Therefore, changing x to 4 is irrelevant.  Final output of the program is:
+In this case, incw() and incx() will be evaluated before foo(), and their values (9 and 13 respectively) passed on to foo.  Changing x to 4 is irrelevant because incx has already returned.  Final output of the program is:
 ```
 19
 13
