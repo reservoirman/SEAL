@@ -77,7 +77,8 @@ a:
 ```
 
 
-###2. Optimized Assembly pseudocode for 
+###2. Optimized Assembly Pseudocode for C Switch Statements
+Switch Statement:
 ```c
 switch (a) {
 case 5: x = 2; break;
@@ -88,13 +89,38 @@ case 9: z = 3; break;
 default: z = 4; break;
 }
 ```
-
+Optimized Pseudocode Assembly:
 ```asm
-
+	cmp a, 5
+	blt R1
+	cmp a, 9
+	bgt R1
+	sub 5, a	;a -= 5
+	jmp R3 + a	;jump to a - 5 instructions past R3.  R3 marks the start of the jump table.	  
+				;Of course this pseudocode allows assigning addresses to labels.
+R3:	jmp R5		
+	jmp R6
+	jmp R7
+	jmp R8
+	jmp R9
+R5:	mov 2, x	;a was 5
+	jmp BR
+R6:	mov 5, x	;a was 6
+	jmp BR
+R7:	mov 24, x	;a was 7
+	mov 11, y
+	jmp BR
+R8:	mov 8, y	;a was 8
+	jmp BR
+R9:	mov 3, z	;a was 9
+	jmp BR
+R1:	mov 4, z	;a was not 5 - 9
+	jmp BR
+BR:	nop
 ```
 
 
-
+Switch Statement:
 ```c
 switch (b) {
 case 5: a = 18; break;
@@ -104,17 +130,18 @@ case 5644: c = 8; break;
 default: c = 17; break;
 }
 ```
+Optimized Pseudocode Assembly:
 ```asm
-	cmp b, 5
+	cmp 5, b
 	beq L1
 	nop
-	cmp b, 73
+	cmp 73, b
 	beq L2
 	nop
-	cmp b, 105
+	cmp 105, b
 	beq L3
 	nop
-	cmp b, 5644
+	cmp 5644, b
 	nop
 	mov 17, c
 	jmp BK
@@ -132,7 +159,3 @@ BK:	nop
 
 
 
-
---- | --- | ---
-*Still* | `renders` | **nicely**
-1 | 2 | 3
