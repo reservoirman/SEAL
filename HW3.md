@@ -77,7 +77,33 @@ a:
 ```
 
 
-###2.
+###2. Optimized Assembly pseudocode for 
+```c
+switch (a) {
+case 5: x = 2; break;
+case 6: x = 5; break;
+case 7: x = 24; y = 11; break;
+case 8: y = 8; break;
+case 9: z = 3; break;
+default: z = 4; break;
+}
+```
+
+```asm
+
+```
+
+
+
+```c
+switch (b) {
+case 5: a = 18; break;
+case 73: a = 2; break;
+case 105: b = 7; c = 10; break;
+case 5644: c = 8; break;
+default: c = 17; break;
+}
+```
 ```asm
 	cmp b, 5
 	beq L1
@@ -91,17 +117,17 @@ a:
 	cmp b, 5644
 	nop
 	mov 17, c
-	jmp BREAK
+	jmp BK
 L1:	mov 18, a
-	jmp BREAK
+	jmp BK
 L2:	mov 2, a
-	jmp BREAK
+	jmp BK
 L3:	mov 7, b
 	mov 10, c
-	jmp BREAK
+	jmp BK
 L4:	mov 8, c
-	jmp BREAK
-BREAK:	nop
+	jmp BK
+BK:	nop
 ```
 
 
