@@ -7,8 +7,8 @@
 ###1. (a) 
 Each cell represents one byte, with the first byte starting from the upper right hand corner.
 
-|         |            |   |  |
-| ------------- |:-------------:| -----:|-----: | 
+|||||
+| ------------- |-------------| -----|----- | 
 | a[0][0] | a[0][0] | a[0][0] | a[0][0]
 | a[0][1] | a[0][1] | a[0][1] | a[0][1]
 | a[0][2] | a[0][2] | a[0][2] | a[0][2]
@@ -75,6 +75,7 @@ a:
 	.ident	"GCC: (Ubuntu/Linaro 4.6.3-1ubuntu5) 4.6.3"
 	.section	.note.GNU-stack,"",@progbits
 ```
+
 
 
 ###2. Optimized Assembly Pseudocode for C Switch Statements
@@ -159,3 +160,42 @@ BK:	nop
 
 
 
+###3. 
+Memory layout for u1. Size = 8 bytes.
+
+|||||
+| ------------- |-------------| -----|----- | 
+| b | b | b / a | b / a 
+|   |  | c | c 
+  
+Memory layout for s1. Size = 12 bytes.
+
+|||||
+| ------------- |-------------| -----|----- | 
+| | b | a |  a 
+|  |  | c | c 
+|d | d | d | d 
+
+Memory layout for s2. Size = 12 bytes.
+
+|||||
+| ------------- |-------------| -----|----- | 
+|d | d | d |  d
+| c  | c | a | a 
+| |  |  | b 
+
+
+
+###4. (a) Applicative-order evaluation
+In this case, incw() and incx() will be evaluated before foo(), and their values (9 and 13 respectively) passed on to foo.  Therefore, changing x to 4 is irrelevant.  Final output of the program is:
+```
+19
+13
+```
+
+###4. (b) Normal-order evaluation
+In this case, incw() and incx() will only be evaluated as the parameters appear, a la C macro style.  So incw() will be evaluated twice since y appears twice, and incx() will be evaluted once, but not until after x becomes 4.  Final output of the program is:
+```
+20
+5
+```
