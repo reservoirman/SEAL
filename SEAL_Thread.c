@@ -45,12 +45,4 @@ void SEALThread_Stop(Thread *t)
 
 }
 
-void SEALThread_Destroy(Thread *t)
-{
-  free(t->pthread);
-  t->pthread = NULL; 
-  t->func = NULL;
-  t->priority = 0;
-}
-
 
