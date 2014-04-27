@@ -32,13 +32,13 @@ type program = string list * func_decl list
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
   | Id(s) -> s
-  | Binop(e1, o, e2) ->
+  | Binop(e1, o, e2) -> "(" ^
       string_of_expr e1 ^ " " ^
       (match o with
 	Add -> "+" | Sub -> "-" | Mult -> "*" | Div -> "/"
       | Equal -> "==" | Neq -> "!="
       | Less -> "<" | Leq -> "<=" | Greater -> ">" | Geq -> ">=") ^ " " ^
-      string_of_expr e2
+      string_of_expr e2 ^ ")"
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
