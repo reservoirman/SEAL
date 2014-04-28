@@ -27,7 +27,7 @@ tr2.Address = 0x810;
 sk.Address = 0x1100;
 sm.Address = 0x1104;
 
-Get_Voltages_And_Currents
+Get_Voltages_And_Currents()
 {
 	String voltages, currents, totalOutput;
 
@@ -74,9 +74,9 @@ Thread Thread2
 Main
 {
 
-	Thread1.Priority = 1;
+	Thread1.Create();
 	Thread1.Go();
-	Thread2.Priority = 2;
+	Thread2.Create();
 	Thread2.Go();
 
 }

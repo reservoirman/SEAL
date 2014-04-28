@@ -3,22 +3,17 @@
 
 typedef struct 
 {
-  int priority;
-  void * pthread;
+  void *pthread;
   void *(*func)(void *);
 
 } Thread;
 
-void SEALThread_Create(Thread *t, void * (*function) (void * arg), int priority);
+void SEALThread_Create(Thread *t, void * (*function) (void * arg));
 
 int SEALThread_Go(Thread *t);
 
-void SEALThread_Join(Thread *t);
+int SEALThread_Join(Thread *t);
 
-void SEALThread_Pause(Thread *t);
-
-void SEALThread_Unpause(Thread *t);
-
-void SEALThread_Stop(Thread *t);
+int SEALThread_Stop(Thread *t);
 
 #endif

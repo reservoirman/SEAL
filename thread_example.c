@@ -15,6 +15,8 @@ void *Thread1Func (void *arg)
   }
 }
 
+int i = 0;
+
 void *Thread2Func (void *arg)
 {
   while (1)
@@ -28,16 +30,28 @@ void *Thread2Func (void *arg)
 
 int main()
 {
-  SEALThread_Create(&thread1, Thread1Func, 1);
-  SEALThread_Create(&thread2, Thread2Func, 2);
+  SEALThread_Create(&thread1, Thread1Func);
+  SEALThread_Create(&thread2, Thread2Func);
 
   SEALThread_Go(&thread1);
   SEALThread_Go(&thread2);
-  SEALThread_Stop(&thread1);
+  //SEALThread_Stop(&thread1);
 
   while (1)
   {
-    printf("Hello World!\n");
+  	    i++;
+    //printf("Hello World!\n");
+  	if (i == 10)
+    {
+    	printf("Stopped voltage and current sensors!\n");
+    	SEALThread_Stop(&thread1);
+    }
+
+    if ( i == 20)
+    {
+    	printf("Reactivated voltage and current sensors!\n");
+    	SEALThread_Go(&thread1);
+    }
     sleep(1);
 
   }
