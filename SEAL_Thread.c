@@ -16,6 +16,7 @@ void SEALThread_Create(Thread *t, void * (*function) (void * arg))
 int SEALThread_Go(Thread *t)
 {
   int success = -1;
+
   if (pthread_create((pthread_t *)t->pthread, NULL, t->func, &_threadID) == 0)
   {
     _threadID++;
@@ -27,7 +28,14 @@ int SEALThread_Go(Thread *t)
 
 int SEALThread_Join(Thread *t)
 {
+  int success = -1;
+  pthread_t thread = *(pthread_t *)t->pthread;
+  if (pthread_join(thread, NULL) == 0)
+  {
+    success = 0;
 
+  }
+  return success;
 }
 
 
@@ -38,9 +46,14 @@ int SEALThread_Stop(Thread *t)
   if (pthread_cancel(thread) == 0)
   {
     success = 0;
-    free(t->pthread);  
   }
   return success;
 }
 
+void SEALThread_Destroy(Thread *t)
+{    
+  free(t->pthread);      
+  t->pthread = NULL;
+  t->func = NULL;
+}
 

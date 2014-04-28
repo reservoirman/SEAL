@@ -16,4 +16,6 @@ int SEALThread_Join(Thread *t);
 
 int SEALThread_Stop(Thread *t);
 
+void SEALThread_Destroy(Thread *t);
+
 #endif
