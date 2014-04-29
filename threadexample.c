@@ -8,12 +8,26 @@
 pthread_t pthr1, pthr2;
 
 char message[] = "Hello world";
+int run_now = 1;
 
 void *thread_function (void *arg)
 {
 	printf("Thread_function is running.  Argument is currently %s\n", (char *)arg);
 	sleep(3);
 	strcpy(message, "Bye!");
+	int print_count2 = 0;
+	while(print_count2++ < 20)
+	{
+		if (run_now == 2)
+		{
+			printf("2");
+			run_now = 1;
+		}
+		else
+		{
+			sleep(1);
+		}
+	}
 	pthread_exit("Thank you for the CPU time!");
 	
 }
@@ -42,7 +56,22 @@ int main()
 		exit(EXIT_FAILURE);
 	}
 
-	printf("Waiting for thread to finish...\n");
+	int print_count1 = 0;
+
+	while (print_count1++ < 20) 
+	{
+		if (run_now == 1)
+		{
+			printf("1");
+			run_now = 2;
+		}
+		else 
+		{
+			sleep(1);
+		}
+	}
+
+	printf("\nWaiting for thread to finish...\n");
 	res = pthread_join(a_thread, &thread_result);
 	if (res != 0)
 	{
