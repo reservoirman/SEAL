@@ -3,16 +3,20 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "SEAL_Thread.h"
+#include "SEAL_Lock.h"
 
 Thread thread1, thread2, thread3;
+Lock lock1;
 int i = 0;
 
 void *iCounter(void *arg)
 {
 	while (1)
 	{ 
-		sleep(1); 
-		i++;
+	sleep(1);
+SEALLock_Acquire(&lock1);
+	i++;
+SEALLock_Release(&lock1);	
 	}
 
 }
@@ -32,7 +36,7 @@ void *Thread2Func (void *arg)
 {
   while (1)
   {
-    sleep(1); 
+	sleep(1);
     printf("Current throttle rate reported.\n");
     if (i == 40)
     {	printf("Thread 2 exiting!\n");
@@ -45,6 +49,7 @@ void *Thread2Func (void *arg)
 
 int main()
 {
+	SEALLock_Create(&lock1);
   SEALThread_Create(&thread1, Thread1Func);
   SEALThread_Create(&thread2, Thread2Func);
   SEALThread_Create(&thread3, iCounter);
@@ -56,6 +61,7 @@ int main()
 
   while (1)
   {
+
     //printf("Hello World!\n");
   	if (i == 10)
     {
@@ -76,13 +82,18 @@ int main()
     	printf("Now waiting for thread2 to finish...\n");
     	SEALThread_Join(&thread2);
     }
-    sleep(1);
+	sleep(1);
 
-    printf("main thread tickin' i = %d!\n", i);
+  	SEALLock_Acquire(&lock1);
+	i++;
+	SEALLock_Release(&lock1);
+	printf("main thread tickin' i = %d!\n", i);
+
   }
 
   SEALThread_Destroy(&thread1);
   SEALThread_Destroy(&thread2);
   SEALThread_Destroy(&thread3);
+  SEALLock_Destroy(&lock1);
   return 0;
 }
