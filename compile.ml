@@ -1,5 +1,5 @@
 open Ast
-open Bytecode
+open Tac
 
 module StringMap = Map.Make(String)
 
@@ -9,6 +9,38 @@ type env = {
     global_index   : int StringMap.t; (* "Address" for global variables *)
     local_index    : int StringMap.t; (* FP offset for args, locals *)
   }
+
+type sealType = 
+Void | Bit | Byte | Short | Ushort | Int | Uint | Long | Ulong | Float | Double | Custom
+
+type sealConstruct = Interrupt | Thread | Variable | Function
+
+type sealVarSymbolTableEntry = {
+  name : string;
+  size : int;
+  data_type : sealType;
+}
+
+type sealFuncSymbolTableEntry = {
+  name2 : string;
+  size2 : int;
+  data_type2 : sealType;
+  parameters : string StringMap.t;
+}
+
+type symbol_table = {
+  parent : symbol_table option;
+  sealVarSymbolTable : string StringMap.t;
+  sealFuncSymbolTable : string StringMap.t;
+}
+
+type environment = {
+  scope : symbol_table;
+  sealThreadSymbolTable : string list;
+  sealInterruptSymbolTable : string list;
+}
+
+
 
 (* val enum : int -> 'a list -> (int * 'a) list *)
 let rec enum stride n = function
