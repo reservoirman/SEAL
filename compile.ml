@@ -13,7 +13,7 @@ type env = {
 type sealType = 
 Void | Bit | Byte | Short | Ushort | Int | Uint | Long | Ulong | Float | Double | Custom
 
-type sealConstruct = Interrupt | Thread | Variable | Function
+type sealConstruct = Interrupt | Thread | Variable | Function | NewType
 
 type sealVarSymbolTableEntry = {
   name : string;
@@ -34,10 +34,16 @@ type symbol_table = {
   sealFuncSymbolTable : string StringMap.t;
 }
 
+type type_table = {
+  properties : string StringMap.t;
+  functions : string StringMap.t;
+}
+
 type environment = {
   scope : symbol_table;
   sealThreadSymbolTable : string list;
   sealInterruptSymbolTable : string list;
+  sealTypeSymbolTable : string StringMap.t;
 }
 
 
