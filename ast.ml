@@ -21,13 +21,39 @@ type stmt =
   | While of expr * stmt
 
 type func_decl = {
+    rtype : string ;
     fname : string;
     formals : string list;
     locals : string list;
     body : stmt list;
   }
 
+type thread_decl = {
+    tname : string;
+    tlocals : string list;
+    tbody : stmt list;
+}
+
+type interrupt_decl = {
+    iname : string;
+    ilocals : string list;
+    ibody : stmt list;
+}
+
+type type_decl = {
+  yname      : string;
+  yproperties : string list;
+  yfunctions  : func_decl list;
+}
+
+let first = fun (a,b,c,d,e) -> a
+let second = fun (a,b,c,d,e) -> b
+let third = fun (a,b,c,d,e) -> c
+let fourth = fun (a,b,c,d,e) -> d
+let fifth = fun (a,b,c,d,e) -> e
+
 type program = string list * func_decl list
+type program1 = string list * thread_decl list * interrupt_decl list * type_decl list * func_decl list
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
@@ -59,12 +85,33 @@ let rec string_of_stmt = function
 
 let string_of_vdecl id = "int " ^ id ^ ";\n"
 
+(*TSG placeholders for now, fill in later*)
+let string_of_tdecl tdecl = 
+  tdecl.tname
+
+let string_of_idecl idecl = 
+  idecl.iname
+
+let string_of_ydecl ydecl = 
+  ydecl.yname  
+
 let string_of_fdecl fdecl =
   fdecl.fname ^ "(" ^ String.concat ", " fdecl.formals ^ ")\n{\n" ^
   String.concat "" (List.map string_of_vdecl fdecl.locals) ^
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
 
-let string_of_program (vars, funcs) =
-  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
-  String.concat "\n" (List.map string_of_fdecl funcs)
+
+
+
+let string_of_program (vars, threads, interrupts, types, funcs) =
+  "THE LIST OF VARS: " ^
+  String.concat ""  (List.map string_of_vdecl vars) ^ "\n" ^
+    "THE LIST OF THREADS: " ^
+  String.concat ""  (List.map string_of_tdecl threads) ^ "\n" ^
+    "THE LIST OF INTERRUPTS: " ^
+  String.concat ""  (List.map string_of_idecl interrupts) ^ "\n" ^
+    "THE LIST OF TYPES: " ^
+  String.concat ""  (List.map string_of_ydecl types) ^ "\n" ^
+  "\nTHE LIST OF FUNCS: " ^ 
+  String.concat ""  (List.map string_of_fdecl funcs)

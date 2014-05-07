@@ -50,25 +50,70 @@
 %left TIMES DIVIDE
 
 %start program
-%type <Ast.program> program
+%type <Ast.program1> program
 
 %%
 
 
 /* TG 4-22-14 here is where the entire grammar will need to go */
+/*
+transl_unit:
+  | interrupt_def
+  | interrupt_def transl_unit
+*/
+
 
 
 program:
-   /* nothing */ { [], [] }
- | program vdecl { ($2 :: fst $1), snd $1 }
- | program fdecl { fst $1, ($2 :: snd $1) }
+   /* nothing */ { [], [], [], [], [] }
+ | program vdecl { ($2 :: first $1), second $1, third $1, fourth $1, fifth $1 }
+ | program tdecl { first $1, ($2 :: second $1), third $1, fourth $1, fifth $1 }
+ | program idecl { first $1, second $1, ($2 :: third $1), fourth $1, fifth $1 }
+ | program ydecl { first $1, second $1, third $1, ($2 :: fourth $1), fifth $1 }
+ | program fdecl { first $1, second $1, third $1, fourth $1, ($2 :: fifth $1) }
+
+tdecl:
+  THREAD ID LCURLY vdecl_list stmt_list RCURLY 
+  {
+    {
+      tname = $2; 
+      tlocals = List.rev $4; 
+      tbody = List.rev $5;
+    }
+
+  }
+
+idecl:
+  INTERRUPT ID LCURLY vdecl_list stmt_list RCURLY 
+  { 
+    {
+      iname = $2;
+      ilocals = List.rev $4;
+      ibody = List.rev $5;
+    }
+  }
+
+ydecl:
+  TYPE ID LCURLY vdecl_list fdecl_list RCURLY 
+  { 
+    {
+      yname = $2;
+      yproperties = $4;
+      yfunctions = $5; 
+    }
+  }
 
 fdecl:
-   ID LPAREN formals_opt RPAREN LCURLY vdecl_list stmt_list RCURLY
-     { { fname = $1;
-	 formals = $3;
-	 locals = List.rev $6;
-	 body = List.rev $7 } }
+   ID ID LPAREN formals_opt RPAREN LCURLY vdecl_list stmt_list RCURLY
+     { { rtype = $1; fname = $2;
+	 formals = $4;
+	 locals = List.rev $7;
+	 body = List.rev $8 } }
+
+/*TSG 5-7-14*/
+fdecl_list:
+  /* nothing */ { [] }
+  | fdecl_list fdecl { $2 :: $1 }
 
 formals_opt:
     /* nothing */ { [] }
