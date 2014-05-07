@@ -10,40 +10,39 @@ type env = {
     local_index    : int StringMap.t; (* FP offset for args, locals *)
   }
 
-type sealType = 
-Void | Bit | Byte | Short | Ushort | Int | Uint | Long | Ulong | Float | Double | Custom
+type sealType = Void | Bit | Byte | Short | Ushort | Int | Uint | Long | Ulong | Float | Double | Custom
 
 type sealConstruct = Interrupt | Thread | Variable | Function | NewType
 
-type sealVarSymbolTableEntry = {
+type varSymbolTableEntry = {
   name : string;
   size : int;
   data_type : sealType;
 }
 
-type sealFuncSymbolTableEntry = {
+type funcSymbolTableEntry = {
   name2 : string;
   size2 : int;
   data_type2 : sealType;
-  parameters : string StringMap.t;
+  parameters : varSymbolTableEntry StringMap.t;
 }
 
-type symbol_table = {
-  parent : symbol_table option;
-  sealVarSymbolTable : string StringMap.t;
-  sealFuncSymbolTable : string StringMap.t;
+type symbolTable = {
+  parent : symbolTable option;
+  sealVarSymbolTable : varSymbolTableEntry StringMap.t;
 }
 
-type type_table = {
-  properties : string StringMap.t;
-  functions : string StringMap.t;
+type typeTableEntry = {
+  properties : varSymbolTableEntry StringMap.t;
+  functions : funcSymbolTableEntry StringMap.t;
 }
 
 type environment = {
-  scope : symbol_table;
+  scope : symbolTable;
+  sealFuncSymbolTable : funcSymbolTableEntry StringMap.t;
   sealThreadSymbolTable : string list;
   sealInterruptSymbolTable : string list;
-  sealTypeSymbolTable : string StringMap.t;
+  sealTypeSymbolTable : typeTableEntry StringMap.t; (*TSG HMMMM *)
 }
 
 
