@@ -1,6 +1,18 @@
 (*This will define the intermediate language to be used for code generation.
  It will be a form of Three Address Code (3AC).  It is TBD whether the arguments will be 
 written RPN style, Assembly style, or pretty-printing, in-order style*)
+open Ast
+
+type obj = 
+Tacint of Ast.op
+
+type tacstmt = 
+  Bz of int 
+  | Bin of Ast.op
+
+
+
+
 
 type bstmt =
     Lit of int    (* Push a literal *)

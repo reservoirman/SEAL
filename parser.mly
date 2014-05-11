@@ -5,11 +5,14 @@
 %token RETURN IF ELSE FOR WHILE 
 %token <int> LITERAL
 %token <string> ID
+
+%token <float> FLOAT
+%token <string> VAR
 %token EOF
 
 /* SEAL tokens */
  /* unary operators */
-%token INC DEC NOT INV NEG 
+%token INC DEC NOT INV NEG ADDRESS SWAP
  /* binary operators */
 %token ANDL ORL
 %token XOR AND OR 
@@ -17,7 +20,7 @@
 %token BSL BSR
 %token ADD SUB MULT DIV MOD
 /* the fundamental types */
-%token INT UINT FLOAT DOUBLE BIT BYTE SHORT USHORT LONG ULONG BOOL
+%token INT DOUBLE BYTE STRING 
 /* other types */
 %token ENUM STRING LOCK
 /* declarations */
@@ -33,6 +36,8 @@
 %left NOT INV NEG   /* lowest precedence */
 %left DEC 
 %left INC           /* highest precendence */
+%left ADDRESS
+%left SWAP
 
 /* SEAL binary operator precedence, left associative: */
 %left COMMA         /* lowest precedence */
@@ -50,7 +55,7 @@
 %left TIMES DIVIDE
 
 %start program
-%type <Ast.program1> program
+%type <Ast.program> program
 
 %%
 
@@ -66,11 +71,11 @@ transl_unit:
 
 program:
    /* nothing */ { [], [], [], [], [] }
- | program vdecl { ($2 :: first $1), second $1, third $1, fourth $1, fifth $1 }
- | program tdecl { first $1, ($2 :: second $1), third $1, fourth $1, fifth $1 }
- | program idecl { first $1, second $1, ($2 :: third $1), fourth $1, fifth $1 }
- | program ydecl { first $1, second $1, third $1, ($2 :: fourth $1), fifth $1 }
- | program fdecl { first $1, second $1, third $1, fourth $1, ($2 :: fifth $1) }
+ | program vdecl { List.rev ($2 :: first $1), second $1, third $1, fourth $1, fifth $1 }
+ | program tdecl { first $1, List.rev ($2 :: second $1), third $1, fourth $1, fifth $1 }
+ | program idecl { first $1, second $1, List.rev ($2 :: third $1), fourth $1, fifth $1 }
+ | program ydecl { first $1, second $1, third $1, List.rev ($2 :: fourth $1), fifth $1 }
+ | program fdecl { first $1, second $1, third $1, fourth $1, List.rev ($2 :: fifth $1) }
 
 tdecl:
   THREAD ID LCURLY vdecl_list stmt_list RCURLY 
@@ -104,11 +109,25 @@ ydecl:
   }
 
 fdecl:
-   ID ID LPAREN formals_opt RPAREN LCURLY vdecl_list stmt_list RCURLY
-     { { rtype = $1; fname = $2;
-	 formals = $4;
-	 locals = List.rev $7;
-	 body = List.rev $8 } }
+   return_type ID LPAREN formals_opt RPAREN LCURLY vdecl_list stmt_list RCURLY
+   { 
+    { 
+      rtype = $1; 
+      fname = $2;
+      formals = $4;
+      locals = List.rev $7;
+      body = List.rev $8;
+      } 
+    }
+
+return_type:
+  /*none*/      {Void}
+  | BYTE        {Byte}
+  | INT         {print_endline "hey we've got ourselves an Int function!"; Int}
+  | STRING      {print_endline "hey we've got ourselves a String function!"; String}
+  | DOUBLE      {Double}
+  | ID          {Printf.printf "New Type called %s\n" $1; NewType($1)}
+  | return_type LBRACKET RBRACKET {print_endline "Array of "; Array($1)}
 
 /*TSG 5-7-14*/
 fdecl_list:
@@ -117,18 +136,33 @@ fdecl_list:
 
 formals_opt:
     /* nothing */ { [] }
-  | formal_list   { List.rev $1 }
+  | formal_list   { print_endline "Oh snap we got a parameter list!"; List.rev $1 }
+
+formal:
+  return_type ID
+  {
+    {
+      vtype = $1;
+      vname = $2;    
+    }
+  }
 
 formal_list:
-    ID                   { [$1] }
-  | formal_list COMMA ID { $3 :: $1 }
+  /* nothing */               { [] }  
+  | formal_list COMMA formal  { $3 :: $1 }
 
 vdecl_list:
     /* nothing */    { [] }
   | vdecl_list vdecl { $2 :: $1 }
 
 vdecl:
-   INT ID SEMIC { $2 }
+   return_type ID SEMIC 
+   {
+    {
+      vtype = $1;
+      vname = $2; 
+    }
+  }
 
 stmt_list:
     /* nothing */  { [] }
@@ -150,6 +184,7 @@ expr_opt:
 
 expr:
     LITERAL          { Literal($1) }
+
   | ID               { Id($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }

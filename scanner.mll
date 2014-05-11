@@ -1,7 +1,9 @@
 (* scanner for SEAL compiler *)
 { open Parser }
 
-
+let digits = ['0'-'9']+
+let exp = 'e'('+'|'-')? digits
+let lxm = ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* 
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
@@ -30,28 +32,24 @@ rule token = parse
 | "While"  { WHILE }
 | "Return" { RETURN }
 | "Int"    { INT }		(* the following are the fundamental types and are all unique to SEAL *)
-| "Uint"	{ UINT }
-| "Bit"		{ BIT }
 | "Byte"	{ BYTE }
-| "Bool"	{ BOOL }
-| "Short"	{ SHORT }
-| "Ushort" 	{ USHORT }
-| "Long"	{ LONG }
-| "Ulong"	{ ULONG }
-| "Float"	{ FLOAT }
 | "Double"	{ DOUBLE }
+| "String"	{ STRING }
 | "Thread"	{ THREAD }
 | "Interrupt" { INTERRUPT }
 | "Enum"	{ ENUM }
 | '['		{ LBRACKET }	(* for arrays *)
 | ']'		{ RBRACKET }	
 | '.'		{ LABEL }		(* for labels *)
+| "Address" { ADDRESS }
+| "Swap"	{ SWAP }		(* can't be treated like normal labels, need to be handled *)
 | "True"	{ TRUE }
 | "False"	{ FALSE }
 | "Type"	{ TYPE }		(* for the type declaration *)
 | "Lock"	{ LOCK }		(* for the lock type *)
-| ['0'-'9']+ as lxm { LITERAL(int_of_string lxm) }
-| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
+| digits as holla { LITERAL(int_of_string holla) }
+| (digits exp? | digits '.' digits? exp? | digits '.' exp) as holla { FLOAT(float_of_string holla) } 
+| lxm as id { ID(id) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
