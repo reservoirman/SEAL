@@ -13,6 +13,7 @@ type expr =
   | Binop of expr * op * expr
   | Assign of string * expr
   | Call of string * expr list
+  | CastType of sealType * string
   | Noexpr
   (* the following are new expressions for SEAL only 
   | Int of int
@@ -65,7 +66,7 @@ let fourth = fun (a,b,c,d,e) -> d
 let fifth = fun (a,b,c,d,e) -> e
 
 (* type program = string list * func_decl list *)
-type program = var_decl list * thread_decl list * interrupt_decl list * type_decl list * func_decl list
+type program = var_decl list * func_decl list * thread_decl list * interrupt_decl list * type_decl list 
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
@@ -116,14 +117,15 @@ let string_of_fdecl fdecl =
   "}\n"
 
 
-let string_of_program (vars, threads, interrupts, types, funcs) =
+let string_of_program (vars, funcs, threads, interrupts, types) =
   "THE LIST OF VARS: " ^
   String.concat ""  (List.map string_of_vdecl vars) ^ "\n" ^
+  "\nTHE LIST OF FUNCS: \n" ^ 
+  String.concat ""  (List.map string_of_fdecl funcs) ^ "\n" ^
     "THE LIST OF THREADS: \n" ^
   String.concat ""  (List.map string_of_tdecl threads) ^ "\n" ^
     "THE LIST OF INTERRUPTS: \n" ^
   String.concat ""  (List.map string_of_idecl interrupts) ^ "\n" ^
     "THE LIST OF TYPES: \n" ^
-  String.concat ""  (List.map string_of_ydecl types) ^ "\n" ^
-  "\nTHE LIST OF FUNCS: \n" ^ 
-  String.concat ""  (List.map string_of_fdecl funcs)
+  String.concat ""  (List.map string_of_ydecl types)
+

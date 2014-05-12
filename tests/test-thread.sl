@@ -1,9 +1,31 @@
+Int one;
+Int two;
+Double three;
+
 Thread Thread1 
 {	
 	Int output; Int output; Byte holla;
 	If (1) print(1);
 
 }
+
+
+Type State
+{
+
+	Int holla;
+	Double doh;
+	String what;
+String hollaFunc1()
+{
+	
+}
+String hollaFunc2()
+{
+	
+}
+}
+
 
 String function1()
 {
@@ -13,9 +35,12 @@ String function1()
 Int function2()
 {}
 
-Int[][][] function3()
+Int[][][] function3(String a, Int b, Int c)
 {
-	
+	Int d;
+	Double e;
+	String f;
+
 }
 
 Holla function4()

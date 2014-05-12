@@ -72,10 +72,10 @@ transl_unit:
 program:
    /* nothing */ { [], [], [], [], [] }
  | program vdecl { List.rev ($2 :: first $1), second $1, third $1, fourth $1, fifth $1 }
- | program tdecl { first $1, List.rev ($2 :: second $1), third $1, fourth $1, fifth $1 }
- | program idecl { first $1, second $1, List.rev ($2 :: third $1), fourth $1, fifth $1 }
- | program ydecl { first $1, second $1, third $1, List.rev ($2 :: fourth $1), fifth $1 }
- | program fdecl { first $1, second $1, third $1, fourth $1, List.rev ($2 :: fifth $1) }
+ | program fdecl { first $1, List.rev ($2 :: second $1), third $1, fourth $1, fifth $1 }
+ | program tdecl { first $1, second $1, List.rev ($2 :: third $1), fourth $1, fifth $1 }
+ | program idecl { first $1, second $1, third $1, List.rev ($2 :: fourth $1), fifth $1 }
+ | program ydecl { first $1, second $1, third $1, fourth $1, List.rev ($2 :: fifth $1) }
 
 tdecl:
   THREAD ID LCURLY vdecl_list stmt_list RCURLY 
@@ -101,17 +101,22 @@ idecl:
 ydecl:
   TYPE ID LCURLY vdecl_list fdecl_list RCURLY 
   { 
+    print_endline "type declaration!";
     {
       yname = $2;
       yproperties = $4;
+
       yfunctions = $5; 
     }
+
   }
 
 fdecl:
    return_type ID LPAREN formals_opt RPAREN LCURLY vdecl_list stmt_list RCURLY
    { 
+    Printf.printf "hey we've got ourselves a function called %s!\n" $2; 
     { 
+
       rtype = $1; 
       fname = $2;
       formals = $4;
@@ -120,23 +125,22 @@ fdecl:
       } 
     }
 
+/*TSG 5-7-14*/
+fdecl_list:
+  /* nothing */ { [] }
+  | fdecl       { [$1] }
+  | fdecl_list fdecl {print_endline "adding a function!"; List.rev ($2 :: $1) }
+
+
 return_type:
   /*none*/      {Void}
   | BYTE        {Byte}
-  | INT         {print_endline "hey we've got ourselves an Int function!"; Int}
-  | STRING      {print_endline "hey we've got ourselves a String function!"; String}
+  | INT         {Int}
+  | STRING      {String}
   | DOUBLE      {Double}
   | ID          {Printf.printf "New Type called %s\n" $1; NewType($1)}
   | return_type LBRACKET RBRACKET {print_endline "Array of "; Array($1)}
 
-/*TSG 5-7-14*/
-fdecl_list:
-  /* nothing */ { [] }
-  | fdecl_list fdecl { $2 :: $1 }
-
-formals_opt:
-    /* nothing */ { [] }
-  | formal_list   { print_endline "Oh snap we got a parameter list!"; List.rev $1 }
 
 formal:
   return_type ID
@@ -148,12 +152,12 @@ formal:
   }
 
 formal_list:
-  /* nothing */               { [] }  
+  formal /* nothing */        { [$1] }  
   | formal_list COMMA formal  { $3 :: $1 }
 
-vdecl_list:
-    /* nothing */    { [] }
-  | vdecl_list vdecl { $2 :: $1 }
+formals_opt:
+    /* nothing */ { [] }
+  | formal_list   { print_endline "Oh snap we got a parameter list!"; List.rev $1 }
 
 vdecl:
    return_type ID SEMIC 
@@ -164,9 +168,10 @@ vdecl:
     }
   }
 
-stmt_list:
-    /* nothing */  { [] }
-  | stmt_list stmt { $2 :: $1 }
+  
+vdecl_list:
+    /* nothing */    { [] }
+  | vdecl_list vdecl { $2 :: $1 }
 
 stmt:
     expr SEMIC { Expr($1) }
@@ -178,13 +183,13 @@ stmt:
      { For($3, $5, $7, $9) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
 
-expr_opt:
-    /* nothing */ { Noexpr }
-  | expr          { $1 }
+stmt_list:
+    /* nothing */  { [] }
+  | stmt_list stmt { $2 :: $1 }
 
 expr:
     LITERAL          { Literal($1) }
-
+  | LPAREN return_type RPAREN ID { CastType($2, $4) }
   | ID               { Id($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
@@ -199,6 +204,10 @@ expr:
   | ID ASSIGN expr   { Assign($1, $3) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
+
+expr_opt:
+    /* nothing */ { Noexpr }
+  | expr          { $1 }
 
 actuals_opt:
     /* nothing */ { [] }
