@@ -4,11 +4,21 @@ written RPN style, Assembly style, or pretty-printing, in-order style*)
 open Ast
 
 type obj = 
-Tacint of Ast.op
+Tacint of Ast.binop
 
-type tacstmt = 
-  Bz of int 
-  | Bin of Ast.op
+type tacstmt =  (*these may have to be variable type instead *)
+  | Bin of Ast.binop
+  | Var of string * Ast.sealType
+  | Bz of string
+  | Param of string * Ast.sealType
+  | Call of string * int
+  | Thread of string
+  | Interrupt of string
+  | Endthread of string
+  | Endinterrupt of string
+  | Un of Ast.unop
+  | Addr of string * Ast.sealType
+
 
 
 
@@ -17,7 +27,7 @@ type tacstmt =
 type bstmt =
     Lit of int    (* Push a literal *)
   | Drp           (* Discard a value *)
-  | Bin of Ast.op (* Perform arithmetic on top of stack *)
+  | Bin of Ast.binop (* Perform arithmetic on top of stack *)
   | Lod of int    (* Fetch global variable *)
   | Str of int    (* Store global variable *)
   | Lfp of int    (* Load frame pointer relative *)

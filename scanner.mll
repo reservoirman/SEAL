@@ -4,7 +4,8 @@
 let digits = ['0'-'9']+
 let exp = 'e'('+'|'-')? digits
 let lxm = ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* 
-
+let double = (digits exp? | digits '.' digits? exp? | digits '.' exp)
+let str = '"' [^'"']* '"' 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
 | "/*"     { comment lexbuf }           (* Comments *)
@@ -26,6 +27,17 @@ rule token = parse
 | "<="     { LEQ }
 | ">"      { GT }
 | ">="     { GEQ }
+| "||"	   { ORL }
+| "&&"	   { ANDL }
+| "|"		{ OR }
+| "&"		{ AND }
+| "<<"	   { BSL }
+| ">>"     { BSR }
+| "^"	   { XOR }
+| "!"		{ NOT }		(* the unary operators *)
+| "++"		{ INC }
+| "--"		{ DEC }
+| "~"		{ INV }
 | "If"     { IF }
 | "Else"   { ELSE }
 | "For"    { FOR }
@@ -47,9 +59,10 @@ rule token = parse
 | "False"	{ FALSE }
 | "Type"	{ TYPE }		(* for the type declaration *)
 | "Lock"	{ LOCK }		(* for the lock type *)
-| digits as holla { LITERAL(int_of_string holla) }
-| (digits exp? | digits '.' digits? exp? | digits '.' exp) as holla { FLOAT(float_of_string holla) } 
-| lxm as id { ID(id) }
+| digits as integer { ILITERAL(int_of_string integer) }
+| double as dbl 	{ FLITERAL(float_of_string dbl) } 
+| lxm as id 		{ ID(id) }
+| str as slit 		{ SLITERAL(slit) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 

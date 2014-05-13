@@ -1,16 +1,17 @@
-type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq | Asn 
+type binop = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq | Asn 
+type unop = Not | Inc | Dec | Inv
 type sealType = 
   Array of sealType | Void | Byte | Int |  Double | String | NewType of string
 type sealConstruct = Interrupt | Thread | Variable | Function | Class
 
 
 
-type expr =
-    Literal of int
-  | Float of float
-  | Var of string
+type expr =   
+    Iliteral of int
+  | Fliteral of float
+  | Sliteral of string
   | Id of string (* used in SEAL as well *)
-  | Binop of expr * op * expr
+  | Binop of expr * binop * expr
   | Assign of string * expr
   | Call of string * expr list
   | CastType of sealType * string
@@ -69,8 +70,10 @@ let fifth = fun (a,b,c,d,e) -> e
 type program = var_decl list * func_decl list * thread_decl list * interrupt_decl list * type_decl list 
 
 let rec string_of_expr = function
-    Literal(l) -> string_of_int l
-  | Id(s) -> s
+    Sliteral(l) -> l
+  | Fliteral(l) -> string_of_float l
+  | Iliteral(l) ->  string_of_int l
+  | Id(s) -> print_endline ("BY GOLLY IT'S AN ID!" ^ s); s
   | Binop(e1, o, e2) -> "(" ^
       string_of_expr e1 ^ " " ^
       (match o with

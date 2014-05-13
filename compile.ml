@@ -99,18 +99,27 @@ let print_types key value =
 
 (*function that creates symbol tables for variables *)
 let createSealVarSymbolTable map (var_elem: var_decl list) = 
-  List.fold_left (fun map thelist -> StringMap.add thelist.vname thelist.vtype map) map var_elem
+  List.fold_left 
+  (fun map thelist -> 
+    if StringMap.mem thelist.vname map 
+    then 
+      raise(Failure("Compiler error: a variable named \"" ^ thelist.vname ^ "\" already exists.  Please choose a different name.")) 
+    else 
+      StringMap.add thelist.vname thelist.vtype map) 
+  map var_elem
 
 let createSealFuncSymbol (var_elem: func_decl) = 
   {
     ftype = Void;
-    fparameters = createSealVarSymbolTable StringMap.empty var_elem.locals;
+    fparameters = createSealVarSymbolTable StringMap.empty var_elem.formals;
     flocals = createSealVarSymbolTable StringMap.empty var_elem.locals;
   }
 
 (*function that creates symbol table for functions *)
 let createSealFuncSymbolTable map (var_elem: func_decl list) = 
-  List.fold_left (fun map thelist -> StringMap.add thelist.fname (createSealFuncSymbol thelist) map) map var_elem
+  List.fold_left (fun map thelist -> 
+    if StringMap.mem thelist.fname map then raise(Failure("Compiler error: a function named \'" ^ thelist.fname ^ "\' already exists.  Please choose a different name.")) else 
+    StringMap.add thelist.fname (createSealFuncSymbol thelist) map) map var_elem
 
 let createSealThreadSymbol (var_elem: thread_decl) = 
   {
@@ -119,7 +128,9 @@ let createSealThreadSymbol (var_elem: thread_decl) =
 
 (*function that creates symbol table for functions *)
 let createSealThreadSymbolTable map (var_elem: thread_decl list) = 
-  List.fold_left (fun map thelist -> StringMap.add thelist.tname (createSealThreadSymbol thelist) map) map var_elem
+  List.fold_left (fun map thelist -> 
+    if StringMap.mem thelist.tname map then raise(Failure("Compiler error: a Thread named \'" ^ thelist.tname ^ "\' already exists.  Please choose a different name.")) else 
+    StringMap.add thelist.tname (createSealThreadSymbol thelist) map) map var_elem
 
 let createSealInterruptSymbol (var_elem: interrupt_decl) = 
   {
@@ -128,7 +139,9 @@ let createSealInterruptSymbol (var_elem: interrupt_decl) =
   
 (*function that creates symbol table for functions *)
 let createSealInterruptSymbolTable map (var_elem: interrupt_decl list) = 
-  List.fold_left (fun map thelist -> StringMap.add thelist.iname (createSealInterruptSymbol thelist) map) map var_elem
+  List.fold_left (fun map thelist -> 
+    if StringMap.mem thelist.iname map then raise(Failure("Compiler error: an Interrupt handler named \'" ^ thelist.iname ^ "\' already exists.  Please choose a different name.")) else 
+    StringMap.add thelist.iname (createSealInterruptSymbol thelist) map) map var_elem
 
 let createSealTypeSymbol (var_elem: type_decl) = 
   {
@@ -138,7 +151,9 @@ let createSealTypeSymbol (var_elem: type_decl) =
 
 (*function that creates symbol table for functions *)
 let createSealTypeSymbolTable map (var_elem: type_decl list) = 
-  List.fold_left (fun map thelist -> StringMap.add thelist.yname (createSealTypeSymbol thelist) map) map var_elem
+  List.fold_left (fun map thelist -> 
+    if StringMap.mem thelist.yname map then raise(Failure("Compiler error: a Type named \'" ^ thelist.yname ^ "\' already exists.  Please choose a different name.")) else 
+    StringMap.add thelist.yname (createSealTypeSymbol thelist) map) map var_elem
 
 
 (** Translate a program in AST form into a bytecode program.  Throw an
