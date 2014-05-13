@@ -3,11 +3,11 @@
 %token PLUS TIMES MINUS DIVIDE ASSIGN EQ LT LEQ GT GEQ 
 %token SEMIC LPAREN RPAREN LCURLY RCURLY LBRACKET RBRACKET COMMA
 %token RETURN IF ELSE FOR WHILE 
-%token <int> LITERAL
+%token <int> ILITERAL
 %token <string> ID
 
-%token <float> FLOAT
-%token <string> VAR
+%token <float> FLITERAL
+%token <string> SLITERAL
 %token EOF
 
 /* SEAL tokens */
@@ -161,7 +161,7 @@ formals_opt:
 
 vdecl:
    return_type ID SEMIC 
-   {
+   {  print_endline ("VARIABLE: " ^ $2 ^ "!!!!!!");
     {
       vtype = $1;
       vname = $2; 
@@ -171,6 +171,7 @@ vdecl:
   
 vdecl_list:
     /* nothing */    { [] }
+
   | vdecl_list vdecl { $2 :: $1 }
 
 stmt:
@@ -185,10 +186,13 @@ stmt:
 
 stmt_list:
     /* nothing */  { [] }
+  | stmt            {[$1]} 
   | stmt_list stmt { $2 :: $1 }
 
 expr:
-    LITERAL          { Literal($1) }
+    ILITERAL          { Iliteral($1) }
+  | FLITERAL          { Fliteral($1) }
+  | SLITERAL          { Sliteral($1) }  
   | LPAREN return_type RPAREN ID { CastType($2, $4) }
   | ID               { Id($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }

@@ -4,7 +4,8 @@ Double three;
 
 Thread Thread1 
 {	
-	Int output; Int output; Byte holla;
+	If (1) print(1);
+	output = 23;
 	If (1) print(1);
 
 }
@@ -13,12 +14,13 @@ Thread Thread1
 Type State
 {
 
-	Int holla;
-	Double doh;
-	String what;
+	Int State_holla;
+	Double State_doh;
+	String State_what;
 String hollaFunc1()
 {
-	
+
+	State_holla = 32;
 }
 String hollaFunc2()
 {
@@ -40,6 +42,7 @@ Int[][][] function3(String a, Int b, Int c)
 	Int d;
 	Double e;
 	String f;
+	e = 3.145;
 
 }
 
