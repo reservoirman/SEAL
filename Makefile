@@ -1,7 +1,7 @@
-OBJS = ast.cmo parser.cmo scanner.cmo tac.cmo compile.cmo seal.cmo
+OBJS = ast.cmo parser.cmo scanner.cmo compile.cmo seal.cmo
 
 TARFILES = Makefile testall.sh scanner.mll parser.mly \
-	ast.ml tac.ml compile.ml seal.ml \
+	ast.ml compile.ml seal.ml \
 
 seal : $(OBJS)
 	ocamlc -o seal $(OBJS)

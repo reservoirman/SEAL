@@ -12,7 +12,7 @@
 
 /* SEAL tokens */
  /* unary operators */
-%token INC DEC NOT INV NEG ADDRESS SWAP
+%token INC DEC NOT INV NEG ADDRESS SWAP SOURCE MAP
  /* binary operators */
 %token ANDL ORL
 %token XOR AND OR 
@@ -24,7 +24,7 @@
 /* other types */
 %token ENUM STRING LOCK
 /* declarations */
-%token THREAD INTERRUPT TYPE LABEL
+%token THREAD INTERRUPT TYPE LABEL VOID
 /* boolean values */
 %token TRUE FALSE
 
@@ -78,7 +78,7 @@ program:
  | program ydecl { first $1, second $1, third $1, fourth $1, List.rev ($2 :: fifth $1) }
 
 tdecl:
-  THREAD ID LCURLY vdecl_list stmt_list RCURLY 
+  THREAD ID LCURLY vdecl_list stmt_list_opt RCURLY 
   {
     {
       tname = $2; 
@@ -89,7 +89,7 @@ tdecl:
   }
 
 idecl:
-  INTERRUPT ID LCURLY vdecl_list stmt_list RCURLY 
+  INTERRUPT ID LCURLY vdecl_list stmt_list_opt RCURLY 
   { 
     {
       iname = $2;
@@ -99,22 +99,20 @@ idecl:
   }
 
 ydecl:
-  TYPE ID LCURLY vdecl_list fdecl_list RCURLY 
+  TYPE ID LCURLY vdecl_list fdecl_opt RCURLY 
   { 
-    print_endline "type declaration!";
     {
+      ytype = NewType($2);
       yname = $2;
       yproperties = $4;
 
       yfunctions = $5; 
     }
-
   }
 
 fdecl:
-   return_type ID LPAREN formals_opt RPAREN LCURLY vdecl_list stmt_list RCURLY
+   return_type ID LPAREN formals_opt RPAREN LCURLY vdecl_list stmt_list_opt RCURLY
    { 
-    Printf.printf "hey we've got ourselves a function called %s!\n" $2; 
     { 
 
       rtype = $1; 
@@ -125,22 +123,52 @@ fdecl:
       } 
     }
 
+formals_opt:
+    /* nothing */ { [] }
+  | formal_list   { List.rev $1 }
+
+formal_list:
+  formal /* nothing */        { [$1] }  
+  | formal_list COMMA formal  { $3 :: $1 }
+
+
+vdecl_list:
+    /* nothing */    { [] }
+
+  | vdecl_list vdecl { $2 :: $1 }
+
+vdecl:
+   return_type ID SEMIC 
+   {  
+    {
+      vtype = $1;
+      vname = $2; 
+    };
+   }
+    | return_type ID array_id SEMIC 
+     { 
+      {
+        vtype = Array($1, $3);
+        vname = $2; 
+      }
+    }    
+
+array_id:
+  LBRACKET ILITERAL RBRACKET { string_of_int $2 }  
+  | LBRACKET ID RBRACKET { $2 }  
+
+array_size:
+  ILITERAL { Iliteral($1) }
+  | ID { Id($1) }
+
 /*TSG 5-7-14*/
 fdecl_list:
-  /* nothing */ { [] }
   | fdecl       { [$1] }
-  | fdecl_list fdecl {print_endline "adding a function!"; List.rev ($2 :: $1) }
+  | fdecl_list fdecl { $2 :: $1 }
 
-
-return_type:
-  /*none*/      {Void}
-  | BYTE        {Byte}
-  | INT         {Int}
-  | STRING      {String}
-  | DOUBLE      {Double}
-  | ID          {Printf.printf "New Type called %s\n" $1; NewType($1)}
-  | return_type LBRACKET RBRACKET {print_endline "Array of "; Array($1)}
-
+fdecl_opt:
+    /* nothing */ { [] }
+  | fdecl_list   { List.rev $1 }
 
 formal:
   return_type ID
@@ -150,29 +178,30 @@ formal:
       vname = $2;    
     }
   }
-
-formal_list:
-  formal /* nothing */        { [$1] }  
-  | formal_list COMMA formal  { $3 :: $1 }
-
-formals_opt:
-    /* nothing */ { [] }
-  | formal_list   { print_endline "Oh snap we got a parameter list!"; List.rev $1 }
-
-vdecl:
-   return_type ID SEMIC 
-   {  print_endline ("VARIABLE: " ^ $2 ^ "!!!!!!");
+  | return_type ID array_id 
+  {
     {
-      vtype = $1;
-      vname = $2; 
+      vtype = Array($1, $3);
+      vname = $2;
     }
   }
 
-  
-vdecl_list:
-    /* nothing */    { [] }
+return_type:
+   VOID         {Void}
+  | BYTE        {Byte}
+  | INT         {Int}
+  | STRING      {String}
+  | DOUBLE      {Double}
+  | LOCK        {Lock}
+  | ID          {NewType($1)}
 
-  | vdecl_list vdecl { $2 :: $1 }
+stmt_list_opt:
+      /* nothing */  { [] }
+  | stmt_list { List.rev $1 }
+
+stmt_list:
+   stmt /* nothing */  { [$1] }
+  | stmt_list stmt { $2 :: $1 }
 
 stmt:
     expr SEMIC { Expr($1) }
@@ -180,38 +209,57 @@ stmt:
   | LCURLY stmt_list RCURLY { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
-  | FOR LPAREN expr_opt SEMIC expr_opt SEMIC expr_opt RPAREN stmt
-     { For($3, $5, $7, $9) }
-  | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
+  | FOR LPAREN expr_opt SEMIC expr_opt SEMIC expr_opt RPAREN LCURLY stmt_list_opt RCURLY
+     { For($3, $5, $7, $10) }
+  | WHILE LPAREN expr RPAREN LCURLY stmt_list_opt RCURLY { While($3, $6) }
 
-stmt_list:
-    /* nothing */  { [] }
-  | stmt            {[$1]} 
-  | stmt_list stmt { $2 :: $1 }
-
-expr:
-    ILITERAL          { Iliteral($1) }
-  | FLITERAL          { Fliteral($1) }
-  | SLITERAL          { Sliteral($1) }  
-  | LPAREN return_type RPAREN ID { CastType($2, $4) }
-  | ID               { Id($1) }
-  | expr PLUS   expr { Binop($1, Add,   $3) }
-  | expr MINUS  expr { Binop($1, Sub,   $3) }
-  | expr TIMES  expr { Binop($1, Mult,  $3) }
-  | expr DIVIDE expr { Binop($1, Div,   $3) }
-  | expr EQ     expr { Binop($1, Equal, $3) }
-  | expr NEQ    expr { Binop($1, Neq,   $3) }
-  | expr LT     expr { Binop($1, Less,  $3) }
-  | expr LEQ    expr { Binop($1, Leq,   $3) }
-  | expr GT     expr { Binop($1, Greater,  $3) }
-  | expr GEQ    expr { Binop($1, Geq,   $3) }
-  | ID ASSIGN expr   { Assign($1, $3) }
-  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
-  | LPAREN expr RPAREN { $2 }
 
 expr_opt:
     /* nothing */ { Noexpr }
   | expr          { $1 }
+
+expr:
+    ILITERAL          { Iliteral($1) }
+  | FLITERAL          { Fliteral($1) }
+  | SLITERAL          { Sliteral($1) }
+  | ID                {Id($1)}
+  | ID array_id       {ArrayIndex($1, $2)}
+  | ID  LABEL ID array_id { Label(Id($1), (ArrayIndex($3, $4))) }
+  | INC expr          { Unop(Inc, $2) }
+  | DEC expr          { Unop(Dec, $2) }
+  | NOT expr          { Unop(Not, $2) }
+  | INV expr          { Unop(Inv, $2) }
+  | expr PLUS   expr  { Binop($1, Add,   $3) }
+  | expr MINUS  expr  { Binop($1, Sub,   $3) }
+  | expr TIMES  expr  { Binop($1, Mult,  $3) }
+  | expr DIVIDE expr  { Binop($1, Div,   $3) }
+  | expr EQ     expr  { Binop($1, Equal, $3) }
+  | expr NEQ    expr  { Binop($1, Neq,   $3) }
+  | expr LT     expr  { Binop($1, Less,  $3) }
+  | expr LEQ    expr  { Binop($1, Leq,   $3) }
+  | expr GT     expr  { Binop($1, Greater,  $3) }
+  | expr GEQ    expr  { Binop($1, Geq,   $3) }
+  | expr ORL    expr  { Binop($1, Orl,   $3) }
+  | expr ANDL   expr  { Binop($1, Andl,   $3) }  
+  | expr OR     expr  { Binop($1, Or,   $3) }
+  | expr AND    expr  { Binop($1, And,   $3) }  
+  | expr BSR    expr  { Binop($1, Bsr,   $3) }  
+  | expr BSL    expr  { Binop($1, Bsl,   $3) }  
+  | expr XOR    expr  { Binop($1, Xor,   $3) }  
+  | expr ASSIGN expr  { Assign($1, $3) }
+  | ID ADDRESS        { GetAddress($1)}
+  | ID LABEL SOURCE ASSIGN expr  { Signal($1, $5) }
+  | ID LABEL ADDRESS ASSIGN expr { Address($1, $5)}
+  | ID LABEL ADDRESS ASSIGN ID LABEL ADDRESS { Address($1, Id($5))}
+  | ID LABEL SWAP LPAREN RPAREN {Swap($1)}
+  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
+  | ID LABEL ID LPAREN actuals_opt RPAREN { LabelCall($1, $3, $5) }
+  | ID LABEL MAP LPAREN ID COMMA expr COMMA expr RPAREN { Map($1, $5, $7, $9)}
+  | LPAREN expr RPAREN { $2 }
+
+
+
+
 
 actuals_opt:
     /* nothing */ { [] }

@@ -43,11 +43,14 @@ rule token = parse
 | "For"    { FOR }
 | "While"  { WHILE }
 | "Return" { RETURN }
+| "Void"	{ VOID }
 | "Int"    { INT }		(* the following are the fundamental types and are all unique to SEAL *)
 | "Byte"	{ BYTE }
 | "Double"	{ DOUBLE }
 | "String"	{ STRING }
 | "Thread"	{ THREAD }
+| "Source"	{ SOURCE }
+| "Map"		{ MAP }
 | "Interrupt" { INTERRUPT }
 | "Enum"	{ ENUM }
 | '['		{ LBRACKET }	(* for arrays *)

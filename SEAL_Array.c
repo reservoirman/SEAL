@@ -29,7 +29,6 @@ void SEALArray_Map(void *array, void (*function)(void * arg), int length, TYPE t
       map(C_USHORT)
       break;
     case INT:
-      printf("we're an int!\n");
       map(C_INT)
       break;
     case UINT:

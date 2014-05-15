@@ -4,8 +4,6 @@
 
 void * SEALUtil_Swap(void *object, int length);
 
-char * SEALUtil_String(void *object, int length);
-
-int SEALUtil_Length(void *object);
+void * SEALUtil_Move(void * object, void *location, int length);
 
 #endif

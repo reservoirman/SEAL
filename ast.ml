@@ -1,20 +1,31 @@
-type binop = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq | Asn 
-type unop = Not | Inc | Dec | Inv
-type sealType = 
-  Array of sealType | Void | Byte | Int |  Double | String | NewType of string
-type sealConstruct = Interrupt | Thread | Variable | Function | Class
+type binop = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq 
+            | Orl | Andl | Or | And | Bsr | Bsl | Xor
 
+type unop = Not | Inc | Dec | Inv
+type sealConstruct = Interrupt | Thread | Variable | Function | Class
+type sealType = 
+  Array of sealType * string | Void | Byte | Int |  Double | String | Lock | NewType of string
 
 
 type expr =   
     Iliteral of int
   | Fliteral of float
   | Sliteral of string
+  | Variable of sealType
   | Id of string (* used in SEAL as well *)
   | Binop of expr * binop * expr
-  | Assign of string * expr
-  | Call of string * expr list
-  | CastType of sealType * string
+  | Unop of unop * expr
+  | Assign of expr   * expr
+  | Call of string  * expr list (**)
+  | LabelCall of string * string * expr list 
+  | CastType of sealType * expr (* the following are new in SEAL*)
+  | Address of string  * expr
+  | GetAddress of string
+  | ArrayIndex of string  * string 
+  | Label of expr  * expr
+  | Swap of string
+  | Signal of string * expr
+  | Map of string * string * expr * expr
   | Noexpr
   (* the following are new expressions for SEAL only 
   | Int of int
@@ -26,8 +37,8 @@ type stmt =
   | Expr of expr
   | Return of expr
   | If of expr * stmt * stmt
-  | For of expr * expr * expr * stmt
-  | While of expr * stmt
+  | For of expr * expr * expr * stmt list
+  | While of expr * stmt list
 
 type var_decl = {
   vtype : sealType ;
@@ -55,6 +66,7 @@ type interrupt_decl = {
 }
 
 type type_decl = {
+  ytype       : sealType;
   yname      : string;
   yproperties : var_decl list;
   yfunctions  : func_decl list;
@@ -73,18 +85,37 @@ let rec string_of_expr = function
     Sliteral(l) -> l
   | Fliteral(l) -> string_of_float l
   | Iliteral(l) ->  string_of_int l
-  | Id(s) -> print_endline ("BY GOLLY IT'S AN ID!" ^ s); s
+  | Id(s) -> s
   | Binop(e1, o, e2) -> "(" ^
       string_of_expr e1 ^ " " ^
-      (match o with
+      (match o with 
 	Add -> "+" | Sub -> "-" | Mult -> "*" | Div -> "/"
       | Equal -> "==" | Neq -> "!="
-      | Less -> "<" | Leq -> "<=" | Greater -> ">" | Geq -> ">=") ^ " " ^
+      | Less -> "<" | Leq -> "<=" | Greater -> ">" | Geq -> ">=" 
+      | Orl -> "||" | Andl -> "&&" | Or -> "|" | And -> "&" 
+      | Bsr -> ">>" | Bsl -> "<<" | Xor -> "^" ) ^ " " ^
       string_of_expr e2 ^ ")"
-  | Assign(v, e) -> v ^ " = " ^ string_of_expr e
+  | Unop(o, e)-> "(" ^ 
+    (match o with
+      Not -> "!" 
+      | Inc -> "++"
+      | Dec -> "--"
+      | Inv -> "~") ^ string_of_expr e^")" 
+  | Assign(v, e) -> string_of_expr v ^ " = " ^ string_of_expr e
   | Call(f, el) ->
-      f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+      f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ") function call performed."
+  | LabelCall(v, f, el) -> v ^ "." ^ f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ") function call performed."
   | Noexpr -> ""
+  | CastType(a, b)->"" (* the following are new in SEAL*)
+  | Address(a, b)-> a ^ ".Address is now = " ^  string_of_expr b
+  | GetAddress(a)-> "address of " ^ a
+  | ArrayIndex(a, b)-> "Array " ^ a ^ "[" ^  b ^ "] indexed."
+  | Label(a, b)-> string_of_expr a ^ " . " ^ string_of_expr b
+  | Signal(a, b)-> "Interrupt " ^ a ^ " now handling interrupt " ^ string_of_expr b
+  | Variable(a)-> ""
+  | Map(a,b,c,d)-> "Mapping function " ^ b ^ "of type " 
+    ^ string_of_expr d ^ " with "^ string_of_expr c ^ " elements to " ^ a
+  | Swap(a)-> a ^ "has been swapped!"
 
 let rec string_of_stmt = function
     Block(stmts) ->
@@ -96,28 +127,38 @@ let rec string_of_stmt = function
       string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
   | For(e1, e2, e3, s) ->
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
-      string_of_expr e3  ^ ") " ^ string_of_stmt s
-  | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
+      string_of_expr e3  ^ ") " ^ String.concat "" (List.map string_of_stmt s)
+  | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ String.concat "" (List.map string_of_stmt s)
 
 let string_of_vdecl id =  " " ^ id.vname ^ ";\n"
 
 let string_of_vparam id = " " ^ id.vname ^ ", "
-
-(*TSG placeholders for now, fill in later*)
-let string_of_tdecl tdecl = 
-  tdecl.tname ^ "\n"
-
-let string_of_idecl idecl = 
-  idecl.iname ^ "\n"
-
-let string_of_ydecl ydecl = 
-  ydecl.yname ^ "\n"
 
 let string_of_fdecl fdecl =
   fdecl.fname ^ "(" ^ String.concat ", " (List.map (fun x -> x.vname) fdecl.formals) ^ ")\n{\n" ^
   String.concat "" (List.map string_of_vdecl fdecl.locals) ^
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
+
+let string_of_tdecl tdecl = 
+  tdecl.tname ^
+  String.concat "" (List.map string_of_vdecl tdecl.tlocals) ^
+  String.concat "" (List.map string_of_stmt tdecl.tbody) ^
+  "}\n"
+
+let string_of_idecl idecl = 
+  idecl.iname ^ 
+  String.concat "" (List.map string_of_vdecl idecl.ilocals) ^
+  String.concat "" (List.map string_of_stmt idecl.ibody) ^
+  "}\n"
+
+let string_of_ydecl ydecl = 
+  ydecl.yname ^ 
+  String.concat "" (List.map string_of_vdecl ydecl.yproperties) ^
+  String.concat "" (List.map string_of_fdecl ydecl.yfunctions) ^
+  "}\n"
+
+
 
 
 let string_of_program (vars, funcs, threads, interrupts, types) =

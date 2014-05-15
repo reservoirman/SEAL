@@ -10,7 +10,6 @@ int Source;
 void (*func)(int);
 } Interrupt;
 
-void SEALSignal_SetSignal(int sig, Interrupt *interrupt);
 void SEALSignal_SetISR(void (*isr)(int), Interrupt *interrupt);
-
+void SEALSignal_SetSignal(int sig, Interrupt *interrupt);
 #endif

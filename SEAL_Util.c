@@ -19,10 +19,6 @@ void * SEALUtil_Swap(void *object, int length)
 	return object;
 }
 
-char * SEALUtil_String(void *object, int length)
-{
-
-}
 
 void * SEALUtil_Move(void * object, void *location, int length)
 {
