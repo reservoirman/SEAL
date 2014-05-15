@@ -70,7 +70,7 @@ let rec output_function_expr = function
   | Call(f, el) -> 
   (match f with
     "print" -> "printf" ^ "(" ^ String.concat ", &" (List.map output_function_expr el) ^ ")"
-    | _ -> f ^ "(" ^ String.concat ", " (List.map output_function_expr el) ^ ")"
+    | _ -> f ^ "(" ^ String.concat ", &" (List.map output_function_expr el) ^ ")"
   ) 
   | LabelCall(v, f, el)->
   (match f with
