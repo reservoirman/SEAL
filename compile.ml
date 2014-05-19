@@ -43,23 +43,35 @@ type environment = {
   sealTypeSymbolTable : typeTableEntry StringMap.t; (*TSG HMMMM *)
 }
 
+let checkForVar s env = 
+  if (StringMap.mem s env.sealVarSymbolTable) then s 
+        else raise(Failure("Compiler error: a variable named \'" ^ s ^ "\' does not exists."))
+
 let checkFunctionBody theBody env construct = 
 
 let rec output_function_expr = function
     Sliteral(l) -> l
   | Fliteral(l) -> string_of_float l
   | Iliteral(l) ->  string_of_int l
-  | Id(s) ->  s (* match construct with Function | Thread | Interrupt *)(*if ((StringMap.mem s env.sealVarSymbolTable)) then s 
+  | Id(s) -> s ^  
+    (match construct with 
+      Function -> checkForVar s env
+      | Thread -> checkForVar s env
+      | Interrupt -> checkForVar s env
+      | Class -> checkForVar s env
+      | Var -> checkForVar s env )
+
+ (* match construct with Function | Thread | Interrupt *)(*if ((StringMap.mem s env.sealVarSymbolTable)) then s 
               else  ""; raise(Failure("Compiler error:  \'" ^ s ^ "\' does not exist in the current context.")) *)
   | Binop(e1, o, e2) -> "(" ^
-      string_of_expr e1 ^ " " ^
+      output_function_expr e1 ^ " " ^
       (match o with
   Add -> "+" | Sub -> "-" | Mult -> "*" | Div -> "/"
       | Equal -> "==" | Neq -> "!="
       | Less -> "<" | Leq -> "<=" | Greater -> ">" | Geq -> ">=" 
       | Orl -> "||" | Andl -> "&&"| Or -> "|"      | And -> "&" 
       | Bsr -> ">>" | Bsl -> "<<" | Xor -> "^" ) ^ " " ^
-      string_of_expr e2 ^ ")"
+      output_function_expr e2 ^ ")"
   | Unop(o, e)-> "(" ^ 
     (match o with
       Not -> "!" 
@@ -67,11 +79,11 @@ let rec output_function_expr = function
       | Dec -> "--"
       | Inv -> "~") ^ output_function_expr e^")" 
   | Assign(v, e) -> output_function_expr v ^ " = " ^ output_function_expr e
-  | Call(f, el) -> 
+  | Call(f, el) -> if (StringMap.mem f env.sealFuncSymbolTable) then 
   (match f with
     "print" -> "printf" ^ "(" ^ String.concat ", &" (List.map output_function_expr el) ^ ")"
-    | _ -> f ^ "(" ^ String.concat ", &" (List.map output_function_expr el) ^ ")"
-  ) 
+    | _ -> f ^ "(" ^ String.concat ", &" (List.map output_function_expr el) ^ ")") 
+    else raise(Failure("Compiler error: a function named \'" ^ f ^ "\' does not exists."))
   | LabelCall(v, f, el)->
   (match f with
     "Lcreate" -> "SEALLock_Create(&" ^ v ^ ")"
@@ -106,8 +118,8 @@ let rec output_function_stmts = function
   | If(e, s1, s2)       -> "if (" ^ output_function_expr e ^ ")\n" ^
       output_function_stmts s1 ^ "else\n" ^ output_function_stmts s2;
   | For(e1, e2, e3, s)  -> "for (" ^ output_function_expr e1  ^ " ; " ^ output_function_expr e2 ^ " ; " ^
-      string_of_expr e3  ^ ") " ^ String.concat "" (List.map output_function_stmts s) ;
-  | While(e, s)         -> "while (" ^ string_of_expr e ^ ")\n{" ^ String.concat "" (List.map output_function_stmts s) ^"}"
+      output_function_expr e3  ^ ") " ^ String.concat "" (List.map output_function_stmts s) ;
+  | While(e, s)         -> "while (" ^ output_function_expr e ^ ")\n{" ^ String.concat "" (List.map output_function_stmts s) ^"}"
 
 
   in List.map output_function_stmts (List.rev theBody);; 
@@ -181,7 +193,8 @@ let output_interrupts interrupt_table env =
 
 
  let output_functions function_table typeFunction env = 
-  let output_each_function key value =
+  (*we don't print out system functions such as print *)
+  let output_each_function key value = if key <> "print" then (
     print_string (output_typefunc key value.ftype ^ "("); 
     output_params value.fparameters; 
     if typeFunction != Ast.Void then print_string ((output_newtype typeFunction) ^" *itself");
@@ -191,7 +204,7 @@ let output_interrupts interrupt_table env =
     (*eventually output the body here as well*)
     List.map print_endline (checkFunctionBody value.fbodylist env Function); 
     (* List.map print_endline (List.map output_function_stmts value.fbodylist); the gangsta line*)
-    print_endline ("}\n") in
+    print_endline ("}\n")) in
     StringMap.iter output_each_function function_table;;
 
  let output_types types_table env = 
@@ -281,7 +294,6 @@ let createSealFuncSymbolTable map (var_elem: func_decl list) =
     if StringMap.mem thelist.fname map then raise(Failure("Compiler error: a function named \'" ^ thelist.fname ^ "\' already exists.  Please choose a different name.")) else 
     StringMap.add thelist.fname (createSealFuncSymbol thelist) map) map var_elem
 
-
 let createSealThreadSymbol (var_elem: thread_decl) = 
   {
     thlocals = createSealVarSymbolTable StringMap.empty var_elem.tlocals;
@@ -344,6 +356,12 @@ let translate (globals, functions, threads, interrupts, types) =
 
     (* print_endline "OH SNAP HERE's THE LIST OF FUNCTIONS"; *)
     let fun_table = createSealFuncSymbolTable StringMap.empty functions in
+    (*TSG THIS DOESN'T WORK SOMEHOW: 
+    (*adding the standard library function print: *)
+    StringMap.add "print" ({ftype = Ast.Void;
+    fparameters = createSealVarSymbolTable StringMap.empty [];
+    flocals = createSealVarSymbolTable StringMap.empty [];
+    fbodylist = []}) fun_table; *)
     (* StringMap.iter print_funcs fun_table; *)
 
     (* print_endline "OH SNAP HERE's THE LIST OF THREADS"; *)
@@ -371,6 +389,10 @@ let translate (globals, functions, threads, interrupts, types) =
     check_thread_bodies thread_table;
     check_interrupt_bodies interrupt_table;
 *)  
+    
+
+
+    
     print_endline header; 
     output_globals var_table env;
     output_types type_table env;

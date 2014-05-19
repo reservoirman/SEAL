@@ -2,7 +2,7 @@ type binop = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq
             | Orl | Andl | Or | And | Bsr | Bsl | Xor
 
 type unop = Not | Inc | Dec | Inv
-type sealConstruct = Interrupt | Thread | Variable | Function | Class
+type sealConstruct = Interrupt | Thread | Var | Function | Class
 type sealType = 
   Array of sealType * string | Void | Byte | Int |  Double | String | Lock | NewType of string
 
